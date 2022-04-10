@@ -13,9 +13,11 @@
 
         </StackPanel>
         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-            <TextBlock Text="Hello World"></TextBlock>
+            <Button Command="{Binding AddThing}" Content="Add" Height="30" Width="50"></Button>
+            <Button Command="{Binding DelThing}" Content="del" Height="30" Width="50"></Button>
             <TextBlock Text="{Binding Count}"></TextBlock>
             <TextBox Text = "{Binding State}" ></TextBox>
+            <ListBox ItemsSource="{Binding ToDoList}"></ListBox>
         </StackPanel>
     </StackPanel>
     

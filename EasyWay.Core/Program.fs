@@ -8,22 +8,33 @@ type Msg =
     |SetCount
     |SetMinus
     |SetState of string
-type Count = {Count: int; State:int}
+    |AddThing
+    |DelThing
+   
+type Model = {Count: int; State:string; ToDoList: string list}
 
 let init () = { Count = 0
-                State = 10 }, []
+                State = "10"
+                ToDoList = []}, []
 let update msg m =
-    match msg with
-    |SetCount -> {m with Count = m.Count + m.State }, []
-    |SetMinus -> {m with Count = m.Count - m.State}, []
-    |SetState v -> {m with State = (int v) + m.Count }, []
+    match msg with 
+    |SetCount -> {m with Count = m.Count + 1}, []
+    |SetMinus -> {m with Count = m.Count - 1}, []
+    |SetState v -> {m with State = v}, []
+    |AddThing -> {m with ToDoList = m.State :: m.ToDoList }, []
+    |DelThing -> {m with ToDoList = List.Empty},[]
+    
     
    
-let bindings (): Binding<Count, Msg> list =
+let bindings () = 
     ["Count" |> Binding.oneWay (fun m -> m.Count)
      "SetCount" |> Binding.cmd SetCount
      "SetMinus" |> Binding.cmd SetMinus
-     "State" |> Binding.twoWay((fun m -> m.State.ToString()), SetState)] 
+     "State" |> Binding.twoWay((fun m -> m.State.ToString()), SetState)
+     "ToDoList" |> Binding.oneWay (fun m -> m.ToDoList)
+     "AddThing" |> Binding.cmd AddThing
+     "DelThing" |> Binding.cmd DelThing]
+    
 
 let Run window =
     Program.mkProgramWpf
