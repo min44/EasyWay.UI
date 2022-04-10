@@ -3,7 +3,7 @@ using EasyWay.Core;
 
 namespace EasyWay.UI;
 
-
+// start elmish loop
 public partial class App
 {
     public App() => Activated += StartElmish;
