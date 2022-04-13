@@ -1,5 +1,6 @@
 ﻿module EasyWay.Core.Program
-
+open EasyWay.Core
+open Import
 open System
 open EasyWay.Core.Utils
 open Elmish
@@ -22,7 +23,7 @@ type Model =
 
 let init () =
     { Count = 0
-      State = "10"
+      State = List.head namesExported
       ToDoList = [] }, []
 
 
@@ -45,7 +46,7 @@ let update msg m =
     match msg with
     | SetCount   -> { m with Count = m.Count + 1 }, []
     | SetMinus   -> { m with Count = m.Count - 1 }, []
-    | SetState v -> { m with State = v }, []
+    | SetState v -> { m with State = List.head namesExported }, []
     | SetList v ->  { m with ToDoList = v }, []
     | AddThing   -> { m with ToDoList = m.State :: m.ToDoList }, [ SetAsyncCmd m.ToDoList ]
     | DelThing   -> { m with ToDoList = List.Empty }, []

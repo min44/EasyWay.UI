@@ -6,12 +6,15 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Content Include="Data\Data.xlsx" />
         <Compile Include="Logger.fs" />
+        <Compile Include="Import.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="Elmish.WPF" Version="3.5.8" />
+      <PackageReference Include="ExcelProvider" Version="2.0.0" />
       <PackageReference Include="NLog" Version="4.7.15" />
     </ItemGroup>
 
