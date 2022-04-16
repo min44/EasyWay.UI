@@ -4,21 +4,27 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="800" Width="400">
     <StackPanel>
-        
-        <StackPanel VerticalAlignment="Top" HorizontalAlignment="Left">
-            <Button Command="{Binding SetCount}" Content="ButtOn" Height="30" Width="50"></Button>
-            <Button Command="{Binding SetMinus}" Content="ButtOff" Height="30" Width="50"></Button>
-
-        </StackPanel>
+        <Label Content ="MyToDOList" HorizontalAlignment="Center"></Label>
+        <Button Command="{Binding AddThing}" Content="ButtOn" Height="30" Width="50"></Button>
+        <Button Command="{Binding DelThing}" Content="ButtOn" Height="30" Width="50"></Button>
         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-            <Button Command="{Binding AddThing}" Content="Add" Height="30" Width="50"></Button>
-            <Button Command="{Binding DelThing}" Content="del" Height="30" Width="50"></Button>
-            <TextBlock Text="{Binding Count}"></TextBlock>
-            <TextBox Text = "{Binding State}" ></TextBox>
-            <ListBox ItemsSource="{Binding ToDoList}"></ListBox>
+            <TextBox Text="{Binding TextBox, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" HorizontalAlignment="Center" Height="40" Width="200"></TextBox>
         </StackPanel>
+        <ListBox ItemsSource="{Binding ToDoList}"  Width="200">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel>
+                    <Button Command="{Binding RemoveItem}" Content="del" CommandParameter="{Binding Id}"></Button>
+                    <TextBlock Text="{Binding Value}"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+                           
+        </ListBox>
+        
+       
+        
     </StackPanel>
-    
 </Window>

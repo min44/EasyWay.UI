@@ -8,6 +8,7 @@
     <ItemGroup>
         <Content Include="Data\Data.xlsx" />
         <Compile Include="Logger.fs" />
+		<Compile Include="TypesConstructor.fs" />
         <Compile Include="Import.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>
