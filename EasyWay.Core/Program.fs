@@ -1,58 +1,49 @@
 ﻿module EasyWay.Core.Program
-open EasyWay.Core
-//open Import
+
 open System
-open EasyWay.Core.Utils
 open Elmish
 open Elmish.WPF
+open Types
+open Import
+open Export
 
-type Item = { Id: int; Value: string}
-
-type Msg =  
+type Msg =
     | SetTextBox of string
-    | SetList of Item list
-    | AddThing
-    | DelThing
-    | RemoveItem of obj
+    | AddTodo
+    | RemoveTodo of obj
+    | Save
 
-type Model =
-    { 
-      TextBox: string
-      ToDoList: Item list }
+type Model = { TextBox: string; ToDos: Todo list }
 
+let init () = { TextBox = String.Empty; ToDos = GetTodos() }, []
 
-let init () =
-    { 
-      TextBox = String.Empty
-      ToDoList = [] }, []
- 
- 
+let AddThings m =
+    { m with
+        ToDos = { Id = Random().Next(0, 999); Value = m.TextBox } :: m.ToDos
+        TextBox = String.Empty }
+
+let SaveCmd todos =
+    fun dispatch ->
+        async {
+            Export todos
+        } |> Async.StartImmediate
+
 let update msg m =
     match msg with
-  
-    | SetTextBox v -> { m with TextBox = v }, []
-    | SetList v    -> { m with ToDoList = v }, []
-    | AddThing     -> { m with ToDoList = {Id = Random().Next(0,999); Value = m.TextBox} :: m.ToDoList }, []
-    | DelThing     -> { m with ToDoList = [] }, []
-    | RemoveItem b  -> {m with ToDoList = m.ToDoList |> List.filter (fun z -> z.Id <> (b :?> int)) }, []
+    | SetTextBox v  -> { m with TextBox = v }, []
+    | AddTodo       -> AddThings m, []
+    | RemoveTodo b  -> { m with ToDos = m.ToDos |> List.filter (fun z -> z.Id <> (b :?> int)) }, []
+    | Save          -> m, [ SaveCmd m.ToDos ]
 
 
 let bindings () =
-    [ "TextBox"     |> Binding.twoWay ((fun m -> m.TextBox), SetTextBox)
-      "ToDoList"    |> Binding.subModelSeq ((fun m -> m.ToDoList),(fun y -> y.Id), (fun () -> 
-        [ "RemoveItem" |> Binding.cmdParam (fun id -> RemoveItem id ) 
-          "Id"         |> Binding.oneWay (fun (m, s) -> s.Id) 
-          "Value"      |> Binding.oneWay (fun (m, s) -> s.Value) 
-        
-        ]))
-      "AddThing"    |> Binding.cmdIf (AddThing, (fun m -> not <| String.IsNullOrEmpty(m.TextBox)))
-      "DelThing"    |> Binding.cmd DelThing 
-    ]
-    
+    [ "TextBox"         |> Binding.twoWay ((fun m -> m.TextBox), SetTextBox)
+      "ToDos"           |> Binding.subModelSeq ((fun m -> m.ToDos), (fun y -> y.Id), (fun () ->
+        [ "RemoveTodo"  |> Binding.cmdParam RemoveTodo
+          "Id"          |> Binding.oneWay (fun (_, s) -> s.Id)
+          "Value"       |> Binding.oneWay (fun (_, s) -> s.Value) ]))
+      "AddTodo"         |> Binding.cmdIf (AddTodo, (fun m -> not <| String.IsNullOrEmpty(m.TextBox)))
+      "Save"            |> Binding.cmd Save
+      ]
 
-let Run window =
-    Program.mkProgramWpf
-        init
-        update
-        bindings
-    |> Program.startElmishLoop ElmConfig.Default window
+let Run window = Program.mkProgramWpf init update bindings |> Program.startElmishLoop ElmConfig.Default window

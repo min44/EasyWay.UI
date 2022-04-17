@@ -4,27 +4,54 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="MainWindow" Height="800" Width="400">
+        FontFamily="Consolas"
+        FontSize="14"
+        Title="MainWindow"
+        Height="800"
+        Width="400">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Styles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Window.InputBindings>
+        <KeyBinding Key="Enter" Command="{Binding AddTodo}" />
+        <KeyBinding Key="Esc" Command="{Binding CancelCommand }" />
+    </Window.InputBindings>
     <StackPanel>
-        <Label Content ="MyToDOList" HorizontalAlignment="Center"></Label>
-        <Button Command="{Binding AddThing}" Content="ButtOn" Height="30" Width="50"></Button>
-        <Button Command="{Binding DelThing}" Content="ButtOn" Height="30" Width="50"></Button>
-        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-            <TextBox Text="{Binding TextBox, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" HorizontalAlignment="Center" Height="40" Width="200"></TextBox>
+        <Label Content="MyToDoList"
+               HorizontalAlignment="Center">
+        </Label>
+        
+        <StackPanel VerticalAlignment="Center"
+                    HorizontalAlignment="Center">
+            <TextBox Text="{Binding TextBox, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     VerticalAlignment="Center"
+                     HorizontalAlignment="Center"
+                     Height="40"
+                     Width="200">
+            </TextBox>
         </StackPanel>
-        <ListBox ItemsSource="{Binding ToDoList}"  Width="200">
+        
+        <ListBox ItemsSource="{Binding ToDos}"
+                 Width="200">
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <StackPanel>
-                    <Button Command="{Binding RemoveItem}" Content="del" CommandParameter="{Binding Id}"></Button>
-                    <TextBlock Text="{Binding Value}"/>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding Value}" />
+                        <Button Style="{StaticResource RemoveButton}"
+                                Command="{Binding RemoveTodo}"
+                                Content="del"
+                                CommandParameter="{Binding Id}">
+                        </Button>
                     </StackPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>
-                           
         </ListBox>
         
-       
-        
+        <Button Command="{Binding Save}" Content="Save"/>
     </StackPanel>
 </Window>
