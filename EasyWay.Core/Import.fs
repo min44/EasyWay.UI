@@ -12,8 +12,8 @@ module private Data =
     let todos = GetData Todos.Data
 
 open Data
-
+open System
 let GetTodos () =
     todos
-    |> Seq.map (fun x -> { Id = int x.Id; Value = x.Value })
+    |> Seq.map (fun x -> { Id = int x.Id; Value = x.Value; ToDoText = String.Empty })
     |> Seq.toList

@@ -7,6 +7,7 @@
         FontFamily="Consolas"
         FontSize="14"
         Title="MainWindow"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         Height="800"
         Width="400">
 
@@ -17,41 +18,53 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>
+    
     <Window.InputBindings>
         <KeyBinding Key="Enter" Command="{Binding AddTodo}" />
         <KeyBinding Key="Esc" Command="{Binding CancelCommand }" />
     </Window.InputBindings>
-    <StackPanel>
-        <Label Content="MyToDoList"
-               HorizontalAlignment="Center">
-        </Label>
-        
-        <StackPanel VerticalAlignment="Center"
-                    HorizontalAlignment="Center">
-            <TextBox Text="{Binding TextBox, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                     VerticalAlignment="Center"
-                     HorizontalAlignment="Center"
-                     Height="40"
-                     Width="200">
-            </TextBox>
-        </StackPanel>
-        
-        <ListBox ItemsSource="{Binding ToDos}"
+
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="ContentRendered">
+            <i:InvokeCommandAction Command="{Binding Rendered}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+
+    <Grid>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50" />
+            <RowDefinition Height="50" />
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="50"/>
+
+        </Grid.RowDefinitions>
+
+        <Label Content="MyToDoList" HorizontalAlignment="Center" />
+
+        <TextBox Grid.Row="1" Text="{Binding TextBox, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                 VerticalAlignment="Center"
+                 HorizontalAlignment="Center"
+                 Height="40"
                  Width="200">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding Value}" />
-                        <Button Style="{StaticResource RemoveButton}"
-                                Command="{Binding RemoveTodo}"
-                                Content="del"
-                                CommandParameter="{Binding Id}">
-                        </Button>
-                    </StackPanel>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+        </TextBox>
         
-        <Button Command="{Binding Save}" Content="Save"/>
-    </StackPanel>
+        <Grid Grid.Row="2">
+            <ListBox ItemsSource="{Binding ToDos}" ScrollViewer.VerticalScrollBarVisibility="Visible">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding Value}" />
+                            <Button Style="{StaticResource RemoveButton}" Command="{Binding RemoveTodo}" Content="del" CommandParameter="{Binding Id}">
+                            </Button>
+                            <TextBox Text="{Binding ToDoText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                            </TextBox>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+        </Grid>
+        <Button Grid.Row="3" Command="{Binding Save}" Content="Save"/>
+    </Grid>
 </Window>
