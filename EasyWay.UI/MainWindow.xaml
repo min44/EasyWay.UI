@@ -20,7 +20,7 @@
     </Window.Resources>
     
     <Window.InputBindings>
-        <KeyBinding Key="Enter" Command="{Binding AddTodo}" />
+        <KeyBinding Key="Enter" Command="{Binding AddTodo}"/>
         <KeyBinding Key="Esc" Command="{Binding CancelCommand }" />
     </Window.InputBindings>
 
@@ -58,6 +58,9 @@
                             <Button Style="{StaticResource RemoveButton}" Command="{Binding RemoveTodo}" Content="del" CommandParameter="{Binding Id}">
                             </Button>
                             <TextBox Text="{Binding ToDoText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                <TextBox.InputBindings>
+                                    <KeyBinding Key="Enter" Command="{Binding UpdateTodo}"/>
+                                </TextBox.InputBindings>
                             </TextBox>
                         </StackPanel>
                     </DataTemplate>

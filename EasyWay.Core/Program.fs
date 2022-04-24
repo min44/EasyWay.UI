@@ -16,6 +16,7 @@ type Msg =
     | SetTodos of Todo list
     | GetTodos
     | SetToDoText of string * int
+    | UpdateTodo of string * int
 
 type Model = { TextBox: string; ToDos: Todo list }
 
@@ -51,28 +52,36 @@ let SetToDoText (m: Model) value id =
     let todos = List.map maper todos
     { m with ToDos = todos }
 
-
+let updateTodo (m: Model) value id =
+    let todos= m.ToDos
+    let updater t = if t.Id = id then { t with Value = value } else t
+    let todos = List.map updater todos
+    { m with ToDos = todos }
 let update msg m  =
     match msg with
     | SetTextBox v  -> { m with TextBox = v }, []
-    | AddTodo       -> AddThings m, []
+    | AddTodo       -> AddThings m, []  
     | RemoveTodo b  -> RemoveToDo m b, []
     | Save          -> m, [ SaveCmd m.ToDos ]
     | Exit s        -> m, []
     | SetTodos t    -> { m with ToDos = t }, []
     | GetTodos      -> m, [ GetTodosCmd ]
     | SetToDoText (v, id) -> SetToDoText m v id, []
+    | UpdateTodo (v, id)  -> updateTodo m v id, []
 
+let setToDoText a (m, s) =  Msg.SetToDoText (a, s.Id)
 let TodoBinding() =
     [ "RemoveTodo"  |> Binding.cmdParam RemoveTodo
       "Id"          |> Binding.oneWay (fun (_, s) -> s.Id)
       "Value"       |> Binding.oneWay (fun (_, s) -> s.Value)
-      "ToDoText"    |> Binding.twoWay ((fun (_, s) -> s.ToDoText), (fun a (m, s) -> Msg.SetToDoText (a, s.Id))) ]
+      "ToDoText"    |> Binding.twoWay ((fun (_, s) -> s.ToDoText),setToDoText)
+      "UpdateTodo"  |> Binding.cmdIf ((fun (_, s) -> UpdateTodo (s.ToDoText, s.Id)), (fun (m, s) -> not <| String.IsNullOrEmpty(s.ToDoText))) 
+    ]
 
 let bindings () =
     [ "TextBox"         |> Binding.twoWay ((fun m -> m.TextBox), SetTextBox)
       "ToDos"           |> Binding.subModelSeq ((fun m -> m.ToDos), (fun y -> y.Id), TodoBinding)
-      "AddTodo"         |> Binding.cmdIf (AddTodo, (fun m -> not <| String.IsNullOrEmpty(m.TextBox)))
+      "AddTodo"         |> Binding.cmdIf ((fun _ -> AddTodo), (fun m -> not <| String.IsNullOrEmpty(m.TextBox)))
       "Save"            |> Binding.cmd Save
       "Rendered"        |> Binding.cmd GetTodos ]
 
