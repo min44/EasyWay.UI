@@ -3,86 +3,48 @@
 open System
 open Elmish
 open Elmish.WPF
-open Types
-open Import
-open Export
+
+
+type Gender = 
+    |Male
+    |Female
 
 type Msg =
     | SetTextBox of string
-    | AddTodo
-    | RemoveTodo of obj
-    | Save
-    | Exit of obj
-    | SetTodos of Todo list
-    | GetTodos
-    | SetToDoText of string * int
-    | UpdateTodo of string * int
+    | SetGender of Gender
+    | SetSome
+    
 
-type Model = { TextBox: string; ToDos: Todo list }
+type Model = 
+    { TextBox: string; 
+      Gender: Gender; 
+      Itog: string }
 
+let init () = 
+    { TextBox = "Hello"; 
+      Gender = Male; 
+      Itog = "Init" }, []
 
-let init () = { TextBox = String.Empty; ToDos = [] }, []
+let itog m = $"My name is {m.TextBox}, and i am {m.Gender} person"
 
-let AddThings m =
-    { m with
-        ToDos = { Id = Random().Next(0, 999); Value = m.TextBox; ToDoText = String.Empty } :: m.ToDos
-        TextBox = String.Empty }
+let some =
+    fun dispatch -> 
+        async { 
+            do! Async.Sleep 500
+            dispatch SetSome 
+        } |> Async.StartImmediate 
 
-let RemoveToDo m (b: obj) =
-    { m with ToDos = m.ToDos |> List.filter (fun z -> z.Id <> (b :?> int)) }
-
-let SaveCmd todos =
-    fun dispatch ->
-        async {
-            Export todos
-            ()
-        } |> Async.StartImmediate
-
-
-let GetTodosCmd =
-    fun dispatch ->
-        async {
-            Import.GetTodos() |> SetTodos |> dispatch  
-        } |> Async.StartImmediate
-
-
-let SetToDoText (m: Model) value id = 
-    let todos = m.ToDos
-    let maper t = if t.Id = id then { t with ToDoText = value } else t
-    let todos = List.map maper todos
-    { m with ToDos = todos }
-
-let updateTodo (m: Model) value id =
-    let todos= m.ToDos
-    let updater t = if t.Id = id then { t with Value = value } else t
-    let todos = List.map updater todos
-    { m with ToDos = todos }
-let update msg m  =
+let update msg model  =
     match msg with
-    | SetTextBox v  -> { m with TextBox = v }, []
-    | AddTodo       -> AddThings m, []  
-    | RemoveTodo b  -> RemoveToDo m b, []
-    | Save          -> m, [ SaveCmd m.ToDos ]
-    | Exit s        -> m, []
-    | SetTodos t    -> { m with ToDos = t }, []
-    | GetTodos      -> m, [ GetTodosCmd ]
-    | SetToDoText (v, id) -> SetToDoText m v id, []
-    | UpdateTodo (v, id)  -> updateTodo m v id, []
-
-let setToDoText a (m, s) =  Msg.SetToDoText (a, s.Id)
-let TodoBinding() =
-    [ "RemoveTodo"  |> Binding.cmdParam RemoveTodo
-      "Id"          |> Binding.oneWay (fun (_, s) -> s.Id)
-      "Value"       |> Binding.oneWay (fun (_, s) -> s.Value)
-      "ToDoText"    |> Binding.twoWay ((fun (_, s) -> s.ToDoText),setToDoText)
-      "UpdateTodo"  |> Binding.cmdIf ((fun (_, s) -> UpdateTodo (s.ToDoText, s.Id)), (fun (m, s) -> not <| String.IsNullOrEmpty(s.ToDoText))) 
-    ]
+    | SetTextBox v -> { model with TextBox = v }, []
+    | SetGender v  -> { model with Gender = v},  [ some ]
+    | SetSome ->  { model with Itog = itog model }, []
+   
 
 let bindings () =
     [ "TextBox"         |> Binding.twoWay ((fun m -> m.TextBox), SetTextBox)
-      "ToDos"           |> Binding.subModelSeq ((fun m -> m.ToDos), (fun y -> y.Id), TodoBinding)
-      "AddTodo"         |> Binding.cmdIf ((fun _ -> AddTodo), (fun m -> not <| String.IsNullOrEmpty(m.TextBox)))
-      "Save"            |> Binding.cmd Save
-      "Rendered"        |> Binding.cmd GetTodos ]
-
+      "IsMale"          |> Binding.twoWay ((fun m -> m.Gender = Male), (fun x -> SetGender Male))
+      "IsFemale"        |> Binding.twoWay ((fun m -> m.Gender = Female), (fun x -> SetGender Female))
+      "Itog"            |> Binding.oneWay (fun m -> m.Itog) ]
+      
 let Run window = Program.mkProgramWpf init update bindings |> Program.startElmishLoop ElmConfig.Default window

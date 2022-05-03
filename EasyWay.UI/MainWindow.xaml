@@ -31,43 +31,11 @@
     </i:Interaction.Triggers>
 
     <Grid>
-
-        <Grid.RowDefinitions>
-            <RowDefinition Height="50" />
-            <RowDefinition Height="50" />
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="50"/>
-
-        </Grid.RowDefinitions>
-
-        <Label Content="MyToDoList" HorizontalAlignment="Center" />
-
-        <TextBox Grid.Row="1" Text="{Binding TextBox, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                 VerticalAlignment="Center"
-                 HorizontalAlignment="Center"
-                 Height="40"
-                 Width="200">
-        </TextBox>
-        
-        <Grid Grid.Row="2">
-            <ListBox ItemsSource="{Binding ToDos}" ScrollViewer.VerticalScrollBarVisibility="Visible">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{Binding Value}" />
-                            <Button Style="{StaticResource RemoveButton}" Command="{Binding RemoveTodo}" Content="del" CommandParameter="{Binding Id}">
-                            </Button>
-                            <TextBox Text="{Binding ToDoText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                                <TextBox.InputBindings>
-                                    <KeyBinding Key="Enter" Command="{Binding UpdateTodo}"/>
-                                </TextBox.InputBindings>
-                            </TextBox>
-                        </StackPanel>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-
-        </Grid>
-        <Button Grid.Row="3" Command="{Binding Save}" Content="Save"/>
+        <StackPanel>
+            <TextBox Text="{Binding TextBox}"/>
+            <RadioButton Content ="Male" GroupName="Gender" IsChecked="{Binding IsMale}" />
+            <RadioButton Content ="Female" GroupName="Gender" IsChecked="{Binding IsFemale}"/>
+            <TextBlock Text="{Binding Itog}"/>
+        </StackPanel> 
     </Grid>
 </Window>
