@@ -6,83 +6,45 @@ open Elmish.WPF
 open Types
 open Import
 open Export
+open System.Net.Http
+
+
+
 
 type Msg =
     | SetTextBox of string
-    | AddTodo
-    | RemoveTodo of obj
-    | Save
-    | Exit of obj
-    | SetTodos of Todo list
-    | GetTodos
-    | SetToDoText of string * int
-    | UpdateTodo of string * int
+    | Parse 
+    | ClearTextBlock
+    | SetContent of string
 
-type Model = { TextBox: string; ToDos: Todo list }
+type Model = { TextBox: string; Content: string}
 
+let init () = { TextBox = String.Empty; Content = String.Empty }, []
 
-let init () = { TextBox = String.Empty; ToDos = [] }, []
-
-let AddThings m =
-    { m with
-        ToDos = { Id = Random().Next(0, 999); Value = m.TextBox; ToDoText = String.Empty } :: m.ToDos
-        TextBox = String.Empty }
-
-let RemoveToDo m (b: obj) =
-    { m with ToDos = m.ToDos |> List.filter (fun z -> z.Id <> (b :?> int)) }
-
-let SaveCmd todos =
+let parser m = 
     fun dispatch ->
         async {
-            Export todos
-            ()
+           let path = m.TextBox
+           let client = new HttpClient()
+           let request = client.GetByteArrayAsync path
+           let! result = request|>Async.AwaitTask
+           let content = result|>Seq.map (fun x -> x.ToString())|>Seq.toList|>List.reduce (fun x y -> y+x)     
+           dispatch (SetContent content)
         } |> Async.StartImmediate
 
 
-let GetTodosCmd =
-    fun dispatch ->
-        async {
-            Import.GetTodos() |> SetTodos |> dispatch  
-        } |> Async.StartImmediate
-
-
-let SetToDoText (m: Model) value id = 
-    let todos = m.ToDos
-    let maper t = if t.Id = id then { t with ToDoText = value } else t
-    let todos = List.map maper todos
-    { m with ToDos = todos }
-
-let updateTodo (m: Model) value id =
-    let todos= m.ToDos
-    let updater t = if t.Id = id then { t with Value = value } else t
-    let todos = List.map updater todos
-    { m with ToDos = todos }
 let update msg m  =
     match msg with
-    | SetTextBox v  -> { m with TextBox = v }, []
-    | AddTodo       -> AddThings m, []  
-    | RemoveTodo b  -> RemoveToDo m b, []
-    | Save          -> m, [ SaveCmd m.ToDos ]
-    | Exit s        -> m, []
-    | SetTodos t    -> { m with ToDos = t }, []
-    | GetTodos      -> m, [ GetTodosCmd ]
-    | SetToDoText (v, id) -> SetToDoText m v id, []
-    | UpdateTodo (v, id)  -> updateTodo m v id, []
-
-let setToDoText a (m, s) =  Msg.SetToDoText (a, s.Id)
-let TodoBinding() =
-    [ "RemoveTodo"  |> Binding.cmdParam RemoveTodo
-      "Id"          |> Binding.oneWay (fun (_, s) -> s.Id)
-      "Value"       |> Binding.oneWay (fun (_, s) -> s.Value)
-      "ToDoText"    |> Binding.twoWay ((fun (_, s) -> s.ToDoText),setToDoText)
-      "UpdateTodo"  |> Binding.cmdIf ((fun (_, s) -> UpdateTodo (s.ToDoText, s.Id)), (fun (m, s) -> not <| String.IsNullOrEmpty(s.ToDoText))) 
-    ]
+    | SetTextBox v   -> { m with TextBox = v }, []
+    | Parse          ->   m, [parser m]
+    | ClearTextBlock -> { m with Content = String.Empty }, []
+    | SetContent v   -> { m with Content = v }, []
 
 let bindings () =
     [ "TextBox"         |> Binding.twoWay ((fun m -> m.TextBox), SetTextBox)
-      "ToDos"           |> Binding.subModelSeq ((fun m -> m.ToDos), (fun y -> y.Id), TodoBinding)
-      "AddTodo"         |> Binding.cmdIf ((fun _ -> AddTodo), (fun m -> not <| String.IsNullOrEmpty(m.TextBox)))
-      "Save"            |> Binding.cmd Save
-      "Rendered"        |> Binding.cmd GetTodos ]
+      "Parse"           |> Binding.cmd Parse
+      "ClearTextBlock"  |> Binding.cmd ClearTextBlock
+      "Content"         |> Binding.oneWay (fun m -> m.Content)
+    ]
 
 let Run window = Program.mkProgramWpf init update bindings |> Program.startElmishLoop ElmConfig.Default window
